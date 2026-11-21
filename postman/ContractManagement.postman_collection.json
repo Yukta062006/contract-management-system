@@ -1,0 +1,734 @@
+{
+	"info": {
+		"_postman_id": "c1f7b492-9844-48f8-b3d6-7c6d669c5e31",
+		"name": "Contract Management Backend System - API Tests",
+		"description": "Comprehensive Postman collection for Seventh Ray Consulting and Technology Internship Assignment: Contract Management Backend System.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "contractId",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Positive Test Flow",
+			"item": [
+				{
+					"name": "1.1 Upload Contract (PDF)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Contract response has ID, status DRAFT, and extracted text\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"    pm.expect(jsonData.status).to.eql('DRAFT');",
+									"    pm.expect(jsonData.extractedText).to.be.a('string');",
+									"    pm.expect(jsonData).to.have.property('contractDescription');",
+									"    ",
+									"    // Automatically save contractId into collection variable",
+									"    pm.collectionVariables.set(\"contractId\", jsonData.id);",
+									"    console.log(\"Saved contractId: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "samples/sample_employment_agreement.pdf",
+									"description": "Select samples/sample_employment_agreement.pdf or sample_employment_agreement.docx"
+								},
+								{
+									"key": "description",
+									"value": "Employment agreement for Rahul Sharma covering 30-day notice period and Rs. 50,000 monthly CTC in Pune",
+									"type": "text",
+									"description": "Meaningful contract description"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts"
+							]
+						},
+						"description": "Uploads a new PDF contract. Initial status becomes DRAFT."
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Get All Contracts (Summaries)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array of contract summaries without full text\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"    if (jsonData.length > 0) {",
+									"        pm.expect(jsonData[0]).to.have.property('id');",
+									"        pm.expect(jsonData[0]).to.have.property('fileName');",
+									"        pm.expect(jsonData[0]).to.have.property('status');",
+									"        pm.expect(jsonData[0].extractedText).to.be.undefined;",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts"
+							]
+						},
+						"description": "Returns list of all uploaded contracts with summary metadata."
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Get Contract by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Contains full contract details and extractedText\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.eql(Number(pm.collectionVariables.get(\"contractId\")));",
+									"    pm.expect(jsonData.extractedText).to.be.a('string');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}"
+							]
+						},
+						"description": "Retrieves contract by its unique ID."
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Update Status to REVIEW",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Status updated to REVIEW\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('REVIEW');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"REVIEW\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"status"
+							]
+						},
+						"description": "Valid transition: DRAFT -> REVIEW"
+					},
+					"response": []
+				},
+				{
+					"name": "1.5 Update Status to APPROVED",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Status updated to APPROVED\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('APPROVED');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"APPROVED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"status"
+							]
+						},
+						"description": "Valid transition: REVIEW -> APPROVED"
+					},
+					"response": []
+				},
+				{
+					"name": "1.6 Ask Question - Salary",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Answer contains salary details\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.found).to.be.true;",
+									"    pm.expect(jsonData.answer).to.include('50,000');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"What is the salary?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"questions"
+							]
+						},
+						"description": "Queries the contract text for salary information."
+					},
+					"response": []
+				},
+				{
+					"name": "1.7 Ask Question - Notice Period",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Answer contains notice period (30 days)\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.found).to.be.true;",
+									"    pm.expect(jsonData.answer).to.include('30 days');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"What is the notice period?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"questions"
+							]
+						},
+						"description": "Queries the contract text for notice period."
+					},
+					"response": []
+				},
+				{
+					"name": "1.8 Ask Question - Work Location",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Answer contains Pune location\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.found).to.be.true;",
+									"    pm.expect(jsonData.answer).to.include('Pune');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"Where is the work location?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"questions"
+							]
+						},
+						"description": "Queries the contract text for location."
+					},
+					"response": []
+				},
+				{
+					"name": "1.9 Ask Question - Joining Date",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Answer contains joining date\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.found).to.be.true;",
+									"    pm.expect(jsonData.answer).to.include('01 January 2026');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"When is the joining date?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"questions"
+							]
+						},
+						"description": "Queries the contract text for joining date."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Negative Test Scenarios",
+			"item": [
+				{
+					"name": "2.1 Reject Unsupported TXT File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"pm.test(\"Error message indicates unsupported format\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('Unsupported file format');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "samples/sample_unsupported.txt"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts"
+							]
+						},
+						"description": "Attempts to upload a .txt file, expecting 400 Bad Request."
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Reject Corrupted Document",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422 Unprocessable Entity\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"pm.test(\"Error message indicates document parsing failure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('Failed to parse PDF document');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "samples/sample_corrupted.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts"
+							]
+						},
+						"description": "Uploads corrupted file expecting 422 Unprocessable Entity."
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Get Non-Existent Contract by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"pm.test(\"Error message indicates contract not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('not found');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/999999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"999999"
+							]
+						},
+						"description": "Queries an ID that does not exist in the database."
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Reject Invalid Status Transition After APPROVED",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"pm.test(\"Error message indicates transition rejected\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('APPROVED');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"REVIEW\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"status"
+							]
+						},
+						"description": "Attempts a backward transition from APPROVED back to REVIEW, expecting 409 Conflict."
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 Ask Question Not In Document (Bonus Policy)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"found is false and answer indicates information not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.found).to.be.false;",
+									"    pm.expect(jsonData.answer).to.eql('Information not found in the contract.');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"What is the bonus policy?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"questions"
+							]
+						},
+						"description": "Queries an unmentioned clause, expecting found=false."
+					},
+					"response": []
+				},
+				{
+					"name": "2.6 Ask Blank Question",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"question\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/contracts/{{contractId}}/questions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"contracts",
+								"{{contractId}}",
+								"questions"
+							]
+						},
+						"description": "Submits an empty question, expecting validation error (400)."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

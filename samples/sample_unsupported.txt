@@ -1,0 +1,14 @@
+EMPLOYMENT AGREEMENT
+
+This Employment Agreement is entered into by and between Seventh Ray Consulting and Technology Private Limited and the Employee.
+
+1. Employee Name: Rahul Sharma
+2. Role: Software Engineer
+3. Joining Date: 01 January 2026
+4. Working Location: Pune
+5. Salary: Rs. 50,000 per month
+6. Probation: 3 months
+7. Notice Period: 30 days
+8. Leave: 18 days of paid annual leave per calendar year
+9. Confidentiality: The Employee agrees not to disclose proprietary software, client records, or trade secrets during or after employment.
+10. Termination: Either party may terminate employment by giving written notice as specified in the notice period clause.
