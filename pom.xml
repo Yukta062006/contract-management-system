@@ -50,11 +50,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 In-Memory Database for automated tests -->
+        <!-- H2 Database for tests and zero-config cloud deployments -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Apache PDFBox 3.x for extracting text from PDF files -->
